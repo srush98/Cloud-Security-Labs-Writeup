@@ -2,8 +2,8 @@
 
 ## Overview
 
-**Challenge Name:** Do this first!
-**Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
+   **Challenge Name:** Do this first!
+   **Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
 
 CloudFoxable is a hands-on AWS security challenge designed to simulate real-world cloud security misconfigurations. Participants deploy a vulnerable cloud environment using Terraform and work through challenges to identify security risks and extract sensitive data. The first step in this challenge is setting up CloudFoxable and retrieving the first flag by carefully analyzing Terraform’s output.
 
@@ -106,8 +106,8 @@ Run this command from the `cloudfoxable/aws` directory and confirm the deletion 
 
 ## Conclusion
 
-✅ Successfully set up CloudFoxable.
-✅ Extracted the first flag from Terraform output.
-✅ Configured the AWS CLI to use the `ctf-starting-user`.
+   ✅ Successfully set up CloudFoxable.
+   ✅ Extracted the first flag from Terraform output.
+   ✅ Configured the AWS CLI to use the `ctf-starting-user`.
 
 By following these steps, I have a foundational understanding of interacting with AWS security challenges using Terraform.
