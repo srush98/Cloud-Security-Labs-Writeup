@@ -2,8 +2,8 @@
 
 ## Overview
 
-**Challenge Name:** Do this first!
-**Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
+- **Challenge Name:** Do this first!
+- **Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
 
 CloudFoxable is a hands-on AWS security challenge designed to simulate real-world cloud security misconfigurations. Participants deploy a vulnerable cloud environment using Terraform and work through challenges to identify security risks and extract sensitive data. The first step in this challenge is setting up CloudFoxable and retrieving the first flag by carefully analyzing Terraform’s output.
 
