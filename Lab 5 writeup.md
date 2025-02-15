@@ -1,15 +1,15 @@
-# CloudFoxable - First Flag Writeup
+# CloudFoxable challenges - Do this first Flag Writeup
 
 ## Overview
 
-**Challenge Name:** First Flag  
+**Challenge Name:** Do this first!
 **Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
 
-CloudFoxable is a hands-on AWS security challenge where participants deploy an intentionally vulnerable cloud environment using Terraform. The objective is to practice security assessments by identifying misconfigurations and extracting sensitive data.
+CloudFoxable is a hands-on AWS security challenge designed to simulate real-world cloud security misconfigurations. Participants deploy a vulnerable cloud environment using Terraform and work through challenges to identify security risks and extract sensitive data. The first step in this challenge is setting up CloudFoxable and retrieving the first flag by carefully analyzing Terraform’s output.
 
-## Setup Instructions
+## Steps I followed to find the flag:
 
-### Step 1: Prepare Your AWS Environment
+### Step 1: Preparing my AWS Environment
 
 1. Created an AWS account.
 2. Created a non-root IAM user with administrative access.
@@ -25,7 +25,7 @@ CloudFoxable is a hands-on AWS security challenge where participants deploy an i
    ```
    This returned my AWS account ID, user ARN, and principal ID.
 
-### Step 2: Deploy CloudFoxable Using Terraform
+### Step 2: Deploying CloudFoxable Using Terraform
 
 1. Cloned the CloudFoxable repository:
    ```sh
@@ -54,27 +54,27 @@ CloudFoxable is a hands-on AWS security challenge where participants deploy an i
    ```
    Typed `yes` when prompted.
 
-### Step 3: Install AWS Security Tools (Optional, but Recommended)
+### Step 3: Installing AWS Security Tools (Optional, but Recommended)
 
 For better visibility and enumeration, I installed:
 
 - CloudFox
-- **Principal Mapper (Pmapper):**
-- **Pacu (AWS Exploitation Framework):**
+- Principal Mapper (Pmapper)
+- Pacu (AWS Exploitation Framework)
 
 ## Finding the First Flag
 
 ### Step 1: Read Terraform Output
 
-After running `terraform apply`, the output will display critical information about the deployed environment. Look closely at the end of the Terraform output to find:
+After running `terraform apply`, the output displayed critical information about the deployed environment. Looking closely at the end of the Terraform output, I found:
 
 - A new AWS user (`ctf-starting-user`)
 - Access keys for the new user
-- A flag in the format: `FLAG{challengeName::CamelCaseText}`
+- A flag in the format: `FLAG{congrats_you_are_now_a_terraform_expert_happy_hunting}`
 
 ### Step 2: Configure AWS CLI with CTF User
 
-You will need to configure your AWS CLI to use the `ctf-starting-user` to proceed with further challenges:
+Then, I configured my AWS CLI to use the `ctf-starting-user` to proceed with further challenges:
 
 ```sh
 echo "" >> ~/.aws/credentials && \
@@ -84,23 +84,15 @@ echo "aws_secret_access_key = `terraform output -raw CTF_Start_User_Secret_Acces
 echo "region = us-west-2" >> ~/.aws/credentials
 ```
 
-Alternatively, manually configure it by running:
-
-```sh
-aws configure --profile cloudfoxable
-```
-
-Enter the credentials from the Terraform output.
-
 ### Step 3: Verify CTF User Configuration
 
-Check that the new profile works:
+Checking that the new profile works:
 
 ```sh
 aws sts get-caller-identity --profile cloudfoxable
 ```
 
-If configured correctly, this should return the IAM ARN of `ctf-starting-user`.
+It was configured correctly, therefore it returned the IAM ARN of `ctf-starting-user`.
 
 ## Cleanup (Destroy CloudFoxable)
 
@@ -114,8 +106,8 @@ Run this command from the `cloudfoxable/aws` directory and confirm the deletion 
 
 ## Conclusion
 
-✅ Successfully set up CloudFoxable.  
-✅ Extracted the first flag from Terraform output.  
+✅ Successfully set up CloudFoxable.
+✅ Extracted the first flag from Terraform output.
 ✅ Configured the AWS CLI to use the `ctf-starting-user`.
 
 By following these steps, I have a foundational understanding of interacting with AWS security challenges using Terraform.
