@@ -1,39 +1,121 @@
-# Cloudfoxable - 1. Do This First!
+# CloudFoxable - First Flag Writeup
 
-## Introduction
-In this lab, we will walk through the steps to retrieve the flag from the "Cloudfoxable - 1. Do This First!" challenge. This write-up will provide a detailed explanation of the process, including the tools and techniques used.
+## Overview
 
-## Step-by-Step Guide
+**Challenge Name:** First Flag  
+**Starting Point:** [CloudFoxable GitHub Repository](https://github.com/BishopFox/cloudfoxable)
 
-### Step 1: Initial Reconnaissance
-The first step in any challenge is to gather as much information as possible. For this challenge, we start by examining the provided resources and identifying any potential entry points.
+CloudFoxable is a hands-on AWS security challenge where participants deploy an intentionally vulnerable cloud environment using Terraform. The objective is to practice security assessments by identifying misconfigurations and extracting sensitive data.
 
-### Step 2: Analyzing the Environment
-We need to understand the environment we are working in. This includes identifying the cloud service provider, the services in use, and any configurations that might be relevant to our task.
+## Setup Instructions
 
-### Step 3: Identifying Vulnerabilities
-Once we have a good understanding of the environment, we look for any vulnerabilities or misconfigurations that could be exploited. This might involve checking for open ports, weak credentials, or exposed APIs.
+### Step 1: Prepare Your AWS Environment
 
-### Step 4: Exploiting the Vulnerability
-After identifying a potential vulnerability, we attempt to exploit it to gain access to the system. This could involve using tools like `nmap` for port scanning, `hydra` for brute-forcing credentials, or custom scripts to interact with APIs.
+1. Created an AWS account.
+2. Created a non-root IAM user with administrative access.
+3. Generated an access key for the new user.
+4. Installed the AWS CLI ([Download AWS CLI](https://aws.amazon.com/cli/)).
+5. Configured the AWS CLI with my new IAM user credentials:
+   ```sh
+   aws configure
+   ```
+6. Verified AWS CLI configuration:
+   ```sh
+   aws sts get-caller-identity
+   ```
+   This returned my AWS account ID, user ARN, and principal ID.
 
-### Step 5: Retrieving the Flag
-Once we have gained access, we search for the flag. This typically involves navigating through directories, reading files, and looking for any clues that might indicate the flag's location.
+### Step 2: Deploy CloudFoxable Using Terraform
 
-## Example Walkthrough
-Here is an example of how the steps might be applied in a real scenario:
+1. Cloned the CloudFoxable repository:
+   ```sh
+   git clone https://github.com/BishopFox/cloudfoxable
+   cd cloudfoxable/aws
+   ```
+2. Copied and modified the Terraform variables file:
+   ```sh
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+3. Edited `terraform.tfvars` to set my AWS profile:
+   ```hcl
+   aws_local_profile = "terraform-admin-sru"
+   ```
+4. Initialized Terraform:
+   ```sh
+   terraform init
+   ```
+5. Checked the Terraform plan:
+   ```sh
+   terraform plan
+   ```
+6. Deployed the CloudFoxable environment:
+   ```sh
+   terraform apply
+   ```
+   Typed `yes` when prompted.
 
-1. **Reconnaissance**: We start by examining the challenge description and any provided resources. We identify that the target is a cloud-based application hosted on AWS.
+### Step 3: Install AWS Security Tools (Optional, but Recommended)
 
-2. **Analyzing the Environment**: We use tools like `awscli` to list the available services and configurations. We identify that an S3 bucket is publicly accessible.
+For better visibility and enumeration, I installed:
 
-3. **Identifying Vulnerabilities**: We check the permissions on the S3 bucket and find that it allows public read access. This means we can list and read the contents of the bucket.
+- CloudFox
+- **Principal Mapper (Pmapper):**
+- **Pacu (AWS Exploitation Framework):**
 
-4. **Exploiting the Vulnerability**: We use the `aws s3 ls` command to list the contents of the bucket and find a file named `flag.txt`.
+## Finding the First Flag
 
-5. **Retrieving the Flag**: We use the `aws s3 cp` command to download the `flag.txt` file and read its contents to retrieve the flag.
+### Step 1: Read Terraform Output
+
+After running `terraform apply`, the output will display critical information about the deployed environment. Look closely at the end of the Terraform output to find:
+
+- A new AWS user (`ctf-starting-user`)
+- Access keys for the new user
+- A flag in the format: `FLAG{challengeName::CamelCaseText}`
+
+### Step 2: Configure AWS CLI with CTF User
+
+You will need to configure your AWS CLI to use the `ctf-starting-user` to proceed with further challenges:
+
+```sh
+echo "" >> ~/.aws/credentials && \
+echo "[cloudfoxable]" >> ~/.aws/credentials && \
+echo "aws_access_key_id = `terraform output -raw CTF_Start_User_Access_Key_Id`" >> ~/.aws/credentials && \
+echo "aws_secret_access_key = `terraform output -raw CTF_Start_User_Secret_Access_Key`" >> ~/.aws/credentials && \
+echo "region = us-west-2" >> ~/.aws/credentials
+```
+
+Alternatively, manually configure it by running:
+
+```sh
+aws configure --profile cloudfoxable
+```
+
+Enter the credentials from the Terraform output.
+
+### Step 3: Verify CTF User Configuration
+
+Check that the new profile works:
+
+```sh
+aws sts get-caller-identity --profile cloudfoxable
+```
+
+If configured correctly, this should return the IAM ARN of `ctf-starting-user`.
+
+## Cleanup (Destroy CloudFoxable)
+
+To remove all deployed AWS resources:
+
+```sh
+terraform destroy
+```
+
+Run this command from the `cloudfoxable/aws` directory and confirm the deletion when prompted.
 
 ## Conclusion
-By following these steps, we were able to successfully retrieve the flag from the "Cloudfoxable - 1. Do This First!" challenge. The key to solving this challenge was thorough reconnaissance and careful analysis of the environment to identify and exploit a vulnerability.
 
-Remember, the techniques used in this write-up are for educational purposes only. Always ensure you have permission before attempting to access or exploit any system.
+✅ Successfully set up CloudFoxable.  
+✅ Extracted the first flag from Terraform output.  
+✅ Configured the AWS CLI to use the `ctf-starting-user`.
+
+By following these steps, I have a foundational understanding of interacting with AWS security challenges using Terraform.
