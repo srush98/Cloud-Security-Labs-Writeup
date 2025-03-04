@@ -2,7 +2,7 @@
 
 ## Overview
 
-This write-up documents the step-by-step process to solve the **CloudFoxable - Bastion 100** challenge and retrieve the flag. The challenge involves setting up a **bastion host** and leveraging AWS Systems Manager (SSM) and IAM role permissions to explore and extract the required flag.
+This write-up documents the step-by-step process to solve the CloudFoxable - Bastion 100 challenge and retrieve the flag. The challenge involves setting up a bastion host and leveraging AWS Systems Manager (SSM) and IAM role permissions to explore and extract the required flag.
 
 ---
 
@@ -102,9 +102,53 @@ aws ssm start-session --target i-02b1b4400ba4e0df8
 
 ```
 
----
-
 ## Identifying the Flag
+
+### Some analysis to figure out what permissions I have.
+
+-- To check the Instance Profile Attached to the Bastion Host
+
+I retrieved the IAM instance profile of the EC2 instance:
+
+```bash
+aws ec2 describe-instances --instance-ids i-02b1b4400ba4e0df8 --query "Reservations[].Instances[].IamInstanceProfile" --profile cloudfoxable
+```
+
+-- Identify the IAM Role Assigned to the Instance
+
+I retrieved the IAM role associated with the instance profile:
+
+```bash
+aws iam get-instance-profile --instance-profile-name bastion-cloudfoxable --query 'InstanceProfile.Roles[0].[RoleName, Arn]' --profile cloudfoxable
+```
+
+-- Analyze the Role Policies
+
+I checked the permissions assigned to the reyna role:
+
+```bash
+aws iam list-attached-role-policies --role-name reyna --profile cloudfoxable
+```
+
+-- Review S3 Access Policy
+
+I retrieved the S3 access policy attached to the reyna role:
+
+```bash
+aws iam get-policy-version --policy-arn arn:aws:iam::390844766599:policy/bastion-cloudfoxable-s3 --version-id v1 --profile cloudfoxable
+```
+
+This policy granted s3:ListBucket and s3:GetObject access to the target bucket.
+
+-- Attempt Privilege Escalation via IAM Role Assumption
+
+I attempted to list available IAM roles that could be assumed:
+
+```bash
+aws iam list-roles --profile cloudfoxable
+```
+
+This returned a list of roles, including the reyna role.
 
 ### 8. **Enumerate S3 Buckets**
 
