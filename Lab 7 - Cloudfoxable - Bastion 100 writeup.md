@@ -185,7 +185,21 @@ The flag is revealed:
 {FLAG:bastion::ifYouHaveAccessToAnEC2YouHaveAccessToItsIamPermissions}
 ```
 
----
+## Approach
+
+I started by enabling the bastion challenge with Terraform and configuring AWS credentials. Using CloudFox, I enumerated EC2 instances and IAM roles, identifying the reyna role attached to the bastion host. After an initial SSM session failure, I diagnosed and resolved missing IAM permissions, enabling remote access. Finally, I enumerated S3 buckets, found flag.txt, and retrieved it.
+
+## Challenges
+
+- SSM Connection Failure: Fixed by attaching AmazonSSMManagedInstanceCore policy.
+- Identifying IAM Privileges: Used AWS CLI to analyze role permissions.
+- Locating the Flag: Enumerated S3 buckets to find accessible files.
+
+## Key Takeaways
+
+- IAM roles on EC2 instances can lead to privilege escalation.
+- Cloud enumeration (EC2, IAM, S3) is crucial for security testing.
+- Debugging AWS access requires a structured problem-solving approach.
 
 ## Conclusion
 
@@ -196,8 +210,4 @@ This challenge demonstrated the process of:
 - Debugging SSM connection issues and fixing missing IAM permissions.
 - Using **CloudFox** and AWS CLI to discover **S3 buckets** and retrieve the challenge flag.
 
-This exercise highlights how **EC2 IAM roles** can be leveraged for privilege escalation and why **least privilege principles** are crucial in cloud environments.
-
-**Key Takeaway:** If you have access to an EC2 instance, you may also have access to its associated IAM permissions, which can lead to unintended privilege escalation.
-
----
+**Final Thought:** This challenge reinforced the importance of least privilege IAM policies and careful cloud security monitoring to prevent unauthorized access.
