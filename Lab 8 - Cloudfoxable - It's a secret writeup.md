@@ -8,7 +8,7 @@ This write-up details the step-by-step approach taken to solve the CloudFoxable 
 
 ## Challenge Setup
 
-### 1. **Confirm AWS Identity**
+### Step 1. **Confirm AWS Identity**
 
 To verify authentication as the `ctf-starting-user`, I ran:
 
@@ -18,11 +18,9 @@ aws --profile cloudfoxable sts get-caller-identity
 
 This confirmed that my profile was correctly set up and linked to `arn:aws:iam::ACCOUNT_ID:user/ctf-starting-user`.
 
----
-
 ## Enumerating AWS Resources
 
-### 2. **Run CloudFox to Identify Secrets**
+### Step 2. **Run CloudFox to Identify Secrets**
 
 The challenge hint suggested using **CloudFox** to identify secrets stored in AWS Secrets Manager:
 
@@ -32,7 +30,7 @@ cloudfox aws -p cloudfoxable secrets -v2
 
 I noted the **SSM parameter** `/cloudfoxable/flag/its-a-secret` was a likely candidate for the flag.
 
-### 3. **Extracting Secrets from AWS Systems Manager (SSM)**
+### Step 3. **Extracting Secrets from AWS Systems Manager (SSM)**
 
 Since I identified a potential flag stored as an **SSM Parameter**, I attempted to retrieve it using the AWS CLI:
 
@@ -50,7 +48,7 @@ The flag was successfully retrieved!
 
 ## Understanding IAM Permissions
 
-### 4. **Analyze Why Access Was Granted**
+### Step 4. **Analyze Why Access Was Granted**
 
 To understand why `ctf-starting-user` had access to this secret, I used CloudFox to inspect its permissions:
 
