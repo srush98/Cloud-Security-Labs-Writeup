@@ -1,114 +1,65 @@
-# CloudFoxable - Backwards Write-Up
+# Backwards Challenge Write-up
 
-## Overview
+## **Overview**
+The "Backwards" challenge in CloudFoxable is designed to simulate a real-world cloud penetration testing scenario where you begin with an interesting AWS resource and work backwards to determine who has access to it. In this case, we start with an AWS Secrets Manager ARN and investigate which IAM roles or users have permissions to access it. Once identified, we leverage those permissions to retrieve the secret.
 
-This write-up details the step-by-step approach taken to solve the **CloudFoxable - Backwards** challenge. The challenge revolves around uncovering hidden secrets within AWS services using IAM role permissions, AWS CLI commands, and CloudFox enumeration.
+## **Starting Point**
+ARN: `arn:aws:secretsmanager:us-east-1:ACCOUNTID:secret:DomainAdministrator-Credentials-SUFFIX`
 
----
+CloudFoxable Setup: None required.
 
-## Challenge Setup
+## **Challenge Breakdown**
+1. **Enumerating IAM Roles**
+   - List all IAM roles in the environment:
+     ```sh
+     aws iam list-roles --profile cloudfoxable
+     ```
+   - Identified roles that can be assumed by `ctf-starting-user`.
+   - From the output, determined that `terraform-admin-sru` is an assumable role.
 
-### Step 1. **Confirm AWS Identity**
+2. **Checking Role Permissions**
+   - Enumerated permissions assigned to the `Alexander-Arnold` role:
+     ```sh
+     aws iam list-attached-role-policies --role-name Alexander-Arnold --profile cloudfoxable
+     ```
+   - Retrieved the policy details:
+     ```sh
+     aws iam get-policy-version --policy-arn arn:aws:iam::ACCOUNT_ID:policy/corporate-domain-admin-password-policy --version-id v1 --profile cloudfoxable
+     ```
+   - The policy allows `secretsmanager:GetSecretValue` on the target secret.
 
-After assuming the IAM role `Ertz`, I verified my identity with:
+3. **Identifying the Secret Name**
+   - Use AWS CLI to list available secrets:
+     ```sh
+     aws secretsmanager list-secrets --profile cloudfoxable
+     ```
+   - Confirm that the secret name is `DomainAdministrator-Credentials`.
 
-```bash
-aws --profile ertz sts get-caller-identity
-```
+4. **Assuming the Role**
+   - Configure an AWS CLI profile for `terraform-admin-sru`:
+     ```ini
+     [profile terraform-admin-sru]
+     region = us-east-1
+     role_arn = arn:aws:iam::ACCOUNT_ID:role/terraform-admin-sru
+     source_profile = cloudfoxable
+     ```
+   - Assume the role and retrieve the secret value:
+     ```sh
+     aws secretsmanager get-secret-value --secret-id DomainAdministrator-Credentials --profile terraform-admin-sru
+     ```
 
-This confirmed that my profile was successfully linked to the `Ertz` role.
+5. **Retrieving the Flag**
+   - The flag is successfully retrieved by executing the final command.
 
----
+## **Flag**
+FLAG{backwards::IfYouFindSomethingInterstingFindWhoHasAccessToIt}
 
-## Enumerating AWS Resources
+## **Key Takeaways**
+- Cloud penetration testing often involves working backwards from an identified resource.
+- Permissions are not always explicitly granted; role trust policies can introduce alternative access paths.
+- CloudFox provides powerful enumeration capabilities for assessing access permissions and role assumptions.
+- Understanding AWS IAM intricacies is crucial for effective security testing and privilege escalation.
 
-### Step 2. **List Policies Attached to the Role**
+## **Conclusion**
 
-To understand the role's permissions, I listed the attached policies:
-
-```bash
-aws iam list-attached-role-policies --role-name ertz --profile cloudfoxable
-```
-
-I identified the policy `its-another-secret-policy`, which was crucial for accessing the flag.
-
-### Step 3. **Analyze Policy Permissions**
-
-I retrieved the details of the `its-another-secret-policy`:
-
-```bash
-aws iam get-policy-version --policy-arn arn:aws:iam::390844766599:policy/its-another-secret-policy --version-id v1 --profile cloudfoxable
-```
-
-This policy allowed access to the **SSM Parameter Store** with the action `ssm:GetParameter` for the resource:
-
-```
-arn:aws:ssm:us-west-2:390844766599:parameter/cloudfoxable/flag/its-another-secret
-```
-
-### Step 4. **Retrieve the Secret**
-
-Given the permissions in the policy, I accessed the secret stored in **AWS Systems Manager (SSM)** using the following command:
-
-```bash
-aws ssm get-parameter --name /cloudfoxable/flag/its-another-secret --profile ertz --with-decryption
-```
-
-This successfully returned the flag:
-
-```
-FLAG{ItsAnotherSecret::ThereWillBeALotOfAssumingRolesInThisCTF}
-```
-
----
-
-## Understanding IAM Permissions
-
-### Step 5. **Analyze Why Access Was Granted**
-
-To understand why the `Ertz` role had access to this secret, I analyzed the attached policy using:
-
-```bash
-aws iam get-policy-version --policy-arn arn:aws:iam::390844766599:policy/its-another-secret-policy --version-id v1 --profile cloudfoxable
-```
-
-This policy granted the role permissions to access specific SSM parameters, confirming why the `Ertz` role could retrieve the flag.
-
----
-
-## Approach
-
-- Verified authentication and role assumption to `Ertz` using the AWS CLI.
-- List the policies attached to the `Ertz` role and analyzed permissions.
-- Retrieved the secret from AWS Systems Manager Parameter Store using the `ssm:GetParameter` permission.
-- Decrypted and captured the flag.
-
----
-
-## Challenges Faced
-
-- **Understanding IAM Permissions:** The key challenge was understanding why the `Ertz` role had the necessary permissions. By inspecting the policy attached to the role, I clarified the access control.
-
-- **Retrieving the Flag:** The flag was stored as a SecureString in the SSM Parameter Store, requiring decryption, which was successfully done using the `--with-decryption` option.
-
----
-
-## Key Takeaways
-
-- **IAM policies should be reviewed thoroughly** to ensure least privilege access to sensitive resources.
-- **SecureString parameters** in SSM need decryption to reveal their content.
-- **Role assumption** is a critical part of cloud penetration testing, and understanding the permissions granted by roles is essential.
-
----
-
-## Conclusion
-
-This challenge demonstrated:
-
-- Using **AWS CLI** to assume roles, list policies, and retrieve secrets.
-- The importance of understanding **IAM permissions** to evaluate access control.
-- The need for **proper secret management and decryption** in cloud environments.
-
-**Final Thought:** Cloud security assessments must include proper **role-based access control (RBAC)** and **secure parameter management** to prevent unauthorized access to sensitive information.
-
----
+This challenge highlights the importance of understanding IAM roles, trust relationships, and permissions when performing cloud security assessments. By systematically enumerating roles and policies, we uncovered an assumable role with the necessary permissions to access a critical secret. This approach is a fundamental skill in cloud penetration testing and reinforces the need for strict access controls in cloud environments to prevent unauthorized access to sensitive resources.
