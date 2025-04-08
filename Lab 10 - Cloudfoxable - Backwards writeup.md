@@ -18,9 +18,9 @@ CloudFoxable Setup: None required.
    - From the output, determined that `terraform-admin-sru` is an assumable role.
 
 2. **Checking Role Permissions**
-   - Enumerated permissions assigned to the `Alexander-Arnold` role:
+   - Enumerated permissions assigned to the `terraform-admin-sru` role:
      ```sh
-     aws iam list-attached-role-policies --role-name Alexander-Arnold --profile cloudfoxable
+     aws iam list-attached-role-policies --role-name terraform-admin-sru --profile cloudfoxable
      ```
    - Retrieved the policy details:
      ```sh
